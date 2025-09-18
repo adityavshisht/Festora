@@ -8,13 +8,14 @@
     android:layout_height="match_parent"
     android:padding="24dp"
     android:orientation="vertical"
+    android:background="@color/maincolor"
     android:gravity="center">
 
     <ImageView
         android:id="@+id/logo"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@drawable/logo1"
+        android:layout_width="320dp"
+        android:layout_height="320dp"
+        android:src="@drawable/festora_logo1"
         android:contentDescription="@string/app_name" />
 
     <TextView
@@ -33,7 +34,7 @@
         android:layout_height="wrap_content"
         android:text="Host And Join Events"
         android:textSize="14sp"
-        android:textColor="#666666"
+        android:textColor="#FFFEFE"
         android:layout_marginTop="4dp" />
 
     <Button
@@ -41,20 +42,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Login"
-        android:layout_marginTop="28dp" />
+        android:layout_marginTop="28dp"
+        android:backgroundTint="#1C4B9D"
+        android:textColor="@android:color/white"/>
 
     <Button
         android:id="@+id/btnSignup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Sign up"
-        android:layout_marginTop="12dp" />
+        android:layout_marginTop="12dp"
+        android:backgroundTint="#1C4B9D"
+        android:textColor="@android:color/white"/>
 
     <Button
         android:id="@+id/btnGoogle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Continue with Google"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="24dp"
+        android:backgroundTint="#1C4B9D"
+        android:textColor="@android:color/white"/>
 
 </LinearLayout>

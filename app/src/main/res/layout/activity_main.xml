@@ -12,7 +12,7 @@
 
 
     <ImageView
-        android:src="@drawable/logo"
+        android:src="@drawable/festora_logo1"
         android:layout_width="400dp"
         android:layout_height="300dp"
         android:contentDescription="@string/app_name" />
