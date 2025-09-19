@@ -38,6 +38,8 @@ public class OptionActivity extends AppCompatActivity {
                 startActivity(new Intent(OptionActivity.this, SignupActivity.class)));
 
         // If you've already implemented GoogleSignInActivity (from earlier step), this will launch it.
+        btnGoogle.setOnClickListener(v ->
+                startActivity(new Intent(OptionActivity.this, GoogleSignInActivity.class)));
 
 
     }
