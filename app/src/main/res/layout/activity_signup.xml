@@ -17,7 +17,7 @@
         <ImageView
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:src="@drawable/logo1"
+            android:src="@drawable/festora_logo1"
             android:contentDescription="@string/app_name" />
 
         <TextView
@@ -101,7 +101,7 @@
         <!-- Sign up -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDoSignup"
-            style="@style/Widget.Material3.Button"
+            android:backgroundTint="@color/maincolor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Sign up"
