@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "504927150398",
+    "project_id": "festora-2e28d",
+    "storage_bucket": "festora-2e28d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:504927150398:android:8911689ab7fab1d0f28c6f",
+        "android_client_info": {
+          "package_name": "com.metabots.festora"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "504927150398-tha5oiochi0oulmnuo5vorrbpodo06g6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.metabots.festora",
+            "certificate_hash": "1b841a452b4a1ff3dc2d035275cfb8fe42101f05"
+          }
+        },
+        {
+          "client_id": "504927150398-c25q98e79pg7nllrmouhejfvm2r4de1i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArWXVokcRE_vHpO0UGjs5vMRnx7Os_J6A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "504927150398-c25q98e79pg7nllrmouhejfvm2r4de1i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

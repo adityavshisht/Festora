@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -45,4 +46,20 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // Material Components (latest stable)
+    implementation("com.google.android.material:material:1.12.0")
+
+
+    // Firebase BOM (handles versions)
+    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+
+    // Firebase Auth (for Google + Email login)
+    implementation("com.google.firebase:firebase-auth")
+
+    // (optional) Firebase Analytics
+    implementation("com.google.firebase:firebase-analytics")
+
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 }
