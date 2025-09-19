@@ -55,7 +55,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
 
     // Firebase Auth (for Google + Email login)
-    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-auth:22.3.1    ")
 
     // (optional) Firebase Analytics
     implementation("com.google.firebase:firebase-analytics")

@@ -1,100 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/login_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="24dp"
     android:gravity="center"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginLeft="10dp"
-    android:layout_marginRight="10dp">
-    <ImageView
+    android:background="@color/maincolor">
+
+    <!-- Logo (AppCompatImageView to avoid vector inflate crashes) -->
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/logo"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@drawable/logo1"
-        android:contentDescription="@string/app_name" />
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        app:srcCompat="@drawable/festora_logo1"
+        android:contentDescription="@string/app_name"
+        android:layout_marginBottom="16dp" />
 
+    <!-- Title -->
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/login_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Festora"
+        android:text="Login"
+        android:textSize="26sp"
         android:textStyle="bold"
-        android:textSize="28sp"
         android:textColor="@android:color/black"
-        android:layout_marginTop="12dp" />
-
-    <TextView
-        android:id="@+id/sub"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Host And Join Events"
-        android:textSize="14sp"
-        android:textColor="#666666"
-        android:layout_marginTop="4dp" />
+        android:layout_marginBottom="24dp" />
 
     <!-- Email -->
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+    <EditText
+        android:id="@+id/etEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textEmailAddress"/>
-    </com.google.android.material.textfield.TextInputLayout>
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"
+        android:layout_marginBottom="12dp" />
 
     <!-- Password -->
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+    <EditText
+        android:id="@+id/etPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
         android:hint="Password"
-        app:passwordToggleEnabled="true">
+        android:inputType="textPassword"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"
+        android:layout_marginBottom="20dp" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPassword"/>
-    </com.google.android.material.textfield.TextInputLayout>
-    <TextView
-        android:id="@+id/tvForgotPassword"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Forgot Password?"
-        android:textColor="@color/purple_500"
-        android:textStyle="bold"
-        android:layout_marginTop="8dp"/>
-    <TextView
-        android:id="@+id/tvGoSignup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Don’t have an account? Sign up"
-        android:textStyle="bold"
-        android:layout_marginTop="12dp"/>
-
-    <!-- Filled (default) button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnDoLogin"
-        style="@style/Widget.Material3.Button"
+    <!-- Login -->
+    <Button
+        android:id="@+id/btnLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Login"
-        android:layout_marginTop="24dp"/>
+        android:backgroundTint="#1C4B9D"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="16dp" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnBackLogin"
-        style="@style/Widget.Material3.Button.OutlinedButton"
+    <!-- Google -->
+    <Button
+        android:id="@+id/btnGoogle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Back"
-        android:layout_marginTop="12dp"/>
+        android:text="Continue with Google"
+        android:backgroundTint="#DB4437"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Not a user? Sign up -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Not a user?"
+            android:textSize="14sp"
+            android:textColor="#666666" />
+
+        <TextView
+            android:id="@+id/tvSignup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" Sign up"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:textColor="#1C4B9D"
+            android:clickable="true"
+            android:focusable="true" />
+    </LinearLayout>
+
 </LinearLayout>

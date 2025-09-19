@@ -4,21 +4,22 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
+
     private FirebaseAuth auth;
+    private EditText etEmail, etPassword;
+    private Button btnLogin, btnGoogle;
+    private TextView tvSignup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,89 +27,68 @@ public class LoginActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        // Safe insets
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
-            return insets;
-        });
+        // Bind views (MUST match activity_login.xml exactly)
+        etEmail    = findViewById(R.id.etEmail);
+        etPassword = findViewById(R.id.etPassword);
+        btnLogin   = findViewById(R.id.btnLogin);
+        btnGoogle  = findViewById(R.id.btnGoogle);
+        tvSignup   = findViewById(R.id.tvSignup);
 
         auth = FirebaseAuth.getInstance();
 
-        // Views
-        EditText etEmail    = findViewById(R.id.etEmail);
-        EditText etPassword = findViewById(R.id.etPassword);
-        MaterialButton btnLogin = findViewById(R.id.btnDoLogin);
-        MaterialButton btnBack  = findViewById(R.id.btnBackLogin);
-        TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
-        TextView tvGoSignup       = findViewById(R.id.tvGoSignup);
+        // Email/password login
+        btnLogin.setOnClickListener(v -> tryLogin());
 
-        // Back → OptionActivity
-        btnBack.setOnClickListener(v -> finish());
+        // Google login placeholder
+        btnGoogle.setOnClickListener(v ->
+                Toast.makeText(this, "Google sign-in coming soon", Toast.LENGTH_SHORT).show());
 
-        // Go to Signup
-        tvGoSignup.setOnClickListener(v ->
-                startActivity(new Intent(this, SignupActivity.class)));
+        // “Not a user? Sign up”
+        tvSignup.setOnClickListener(v ->
+                startActivity(new Intent(LoginActivity.this, SignupActivity.class)));
+    }
 
-        // Login with Firebase
-        btnLogin.setOnClickListener(v -> {
-            String email = etEmail.getText().toString().trim();
-            String pass  = etPassword.getText().toString();
+    private void tryLogin() {
+        final String email = etEmail.getText().toString().trim();
+        final String pass  = etPassword.getText().toString();
 
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                etEmail.setError("Enter a valid email");
-                etEmail.requestFocus();
-                return;
-            }
-            if (TextUtils.isEmpty(pass)) {
-                etPassword.setError("Enter password");
-                etPassword.requestFocus();
-                return;
-            }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            etEmail.setError("Enter a valid email");
+            etEmail.requestFocus();
+            return;
+        }
+        if (TextUtils.isEmpty(pass)) {
+            etPassword.setError("Enter password");
+            etPassword.requestFocus();
+            return;
+        }
 
-            btnLogin.setEnabled(false);
-            etEmail.setEnabled(false);
-            etPassword.setEnabled(false);
+        // If Firebase isn’t configured yet, UNCOMMENT the 3 lines below to verify
+        // the navigation path works without crashing, then configure Firebase.
+        // startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+        // finish();
+        // return;
 
-            auth.signInWithEmailAndPassword(email, pass).addOnCompleteListener(task -> {
-                btnLogin.setEnabled(true);
-                etEmail.setEnabled(true);
-                etPassword.setEnabled(true);
+        btnLogin.setEnabled(false);
 
-                if (task.isSuccessful()) {
-                    startActivity(new Intent(this, HomeActivity.class));
+        auth.signInWithEmailAndPassword(email, pass)
+                .addOnSuccessListener(result -> {
+                    Toast.makeText(this, "Welcome!", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(LoginActivity.this, HomeActivity.class));
                     finish();
-                } else {
-                    String msg = (task.getException() != null)
-                            ? task.getException().getMessage() : "Login failed";
-                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
-
-        // Forgot Password
-        tvForgotPassword.setOnClickListener(v -> {
-            String email = etEmail.getText().toString().trim();
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                etEmail.setError("Enter your email first");
-                etEmail.requestFocus();
-                return;
-            }
-            auth.sendPasswordResetEmail(email).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(this, "Reset link sent. Check your email.", Toast.LENGTH_SHORT).show();
-                } else {
-                    String msg = (task.getException() != null)
-                            ? task.getException().getMessage() : "Failed to send reset email";
-                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
+                })
+                .addOnFailureListener(e -> {
+                    btnLogin.setEnabled(true);
+                    String msg = e.getMessage();
+                    if (msg == null || msg.trim().isEmpty()) msg = "Login failed";
+                    Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+                });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        // Auto-skip login if already signed in
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             startActivity(new Intent(this, HomeActivity.class));
             finish();
