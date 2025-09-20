@@ -3,6 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission
+        android:name="android.permission.POST_NOTIFICATIONS"
+        tools:targetApi="33" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" tools:targetApi="29"/>
 
     <application
         android:allowBackup="true"
@@ -39,6 +45,17 @@
             </intent-filter>
         </activity>
         <activity android:name=".ProfileActivity" />
+        <activity
+            android:name=".PersonalInfoActivity"
+            android:exported="false" />
+        <activity android:name=".MyEventsProfileActivity" />
+        <activity
+            android:name=".NotificationsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LocationPrivacyActivity"
+            android:exported="false" />
+
 
     </application>
 

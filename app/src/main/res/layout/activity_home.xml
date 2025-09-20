@@ -22,7 +22,8 @@
             app:titleCentered="true"
             app:navigationIconTint="@android:color/white"
             app:titleTextColor="@android:color/white"
-            android:backgroundTint="@color/maincolor" />
+            android:backgroundTint="@color/maincolor"
+            android:background="?attr/colorSurface" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Content -->
