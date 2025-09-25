@@ -55,7 +55,13 @@
         <activity
             android:name=".LocationPrivacyActivity"
             android:exported="false" />
-
+        <activity
+            android:name=".HelpSupportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TermsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Festora" />
 
     </application>
 

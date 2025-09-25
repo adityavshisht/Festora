@@ -27,7 +27,6 @@ public class LoginActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        // Bind views (MUST match activity_login.xml exactly)
         etEmail    = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnLogin   = findViewById(R.id.btnLogin);
@@ -36,16 +35,27 @@ public class LoginActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
 
-        // Email/password login
         btnLogin.setOnClickListener(v -> tryLogin());
 
-        // Google login placeholder
         btnGoogle.setOnClickListener(v ->
-                Toast.makeText(this, "Google sign-in coming soon", Toast.LENGTH_SHORT).show());
+                startActivity(new Intent(LoginActivity.this, GoogleSignInActivity.class)));
 
-        // “Not a user? Sign up”
         tvSignup.setOnClickListener(v ->
                 startActivity(new Intent(LoginActivity.this, SignupActivity.class)));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            if (!TermsPrefs.hasAccepted(this)) {
+                startActivity(new Intent(this, TermsActivity.class)
+                        .putExtra(TermsActivity.EXTRA_REDIRECT, "home"));
+            } else {
+                startActivity(new Intent(this, HomeActivity.class));
+            }
+            finish();
+        }
     }
 
     private void tryLogin() {
@@ -63,18 +73,16 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // If Firebase isn’t configured yet, UNCOMMENT the 3 lines below to verify
-        // the navigation path works without crashing, then configure Firebase.
-        // startActivity(new Intent(LoginActivity.this, HomeActivity.class));
-        // finish();
-        // return;
-
         btnLogin.setEnabled(false);
 
         auth.signInWithEmailAndPassword(email, pass)
                 .addOnSuccessListener(result -> {
                     Toast.makeText(this, "Welcome!", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+
+                    boolean accepted = TermsPrefs.hasAccepted(this);
+                    Intent next = new Intent(this, accepted ? HomeActivity.class : TermsActivity.class);
+                    next.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(next);
                     finish();
                 })
                 .addOnFailureListener(e -> {
@@ -85,13 +93,4 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // Auto-skip login if already signed in
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            startActivity(new Intent(this, HomeActivity.class));
-            finish();
-        }
-    }
 }

@@ -44,4 +44,17 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+
+    <string name="terms_long_text">
+    Welcome to Festora. Please read these Terms &amp; Conditions carefully...&#10;&#10;
+    1) Use of Service...&#10;
+    2) Accounts...&#10;
+    3) Payments &amp; Refunds...&#10;
+    4) Events &amp; Conduct...&#10;
+    5) Privacy...&#10;
+    6) Liability...&#10;
+    7) Changes to Terms...&#10;
+    8) Contact...
+</string>
+
 </resources>

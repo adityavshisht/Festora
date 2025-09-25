@@ -11,9 +11,6 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,16 +31,8 @@ public class SignupActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_signup);
 
-        // Handle safe insets
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
-            return insets;
-        });
-
         auth = FirebaseAuth.getInstance();
 
-        // Bind views
         etName     = findViewById(R.id.etName);
         etEmail    = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
@@ -66,7 +55,6 @@ public class SignupActivity extends AppCompatActivity {
         String pass  = etPassword.getText().toString();
         String conf  = etConfirm.getText().toString();
 
-        // Validation
         if (TextUtils.isEmpty(name)) { etName.setError("Enter name"); etName.requestFocus(); return; }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) { etEmail.setError("Enter a valid email"); etEmail.requestFocus(); return; }
         if (pass.length() < 6) { etPassword.setError("At least 6 characters"); etPassword.requestFocus(); return; }
@@ -77,18 +65,20 @@ public class SignupActivity extends AppCompatActivity {
         auth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 if (auth.getCurrentUser() != null) {
-                    // Save display name
                     auth.getCurrentUser().updateProfile(
-                            new UserProfileChangeRequest.Builder()
+                            new com.google.firebase.auth.UserProfileChangeRequest.Builder()
                                     .setDisplayName(name)
                                     .build()
                     );
-                    // Optional: send verification email
-                    // auth.getCurrentUser().sendEmailVerification();
                 }
-                startActivity(new Intent(SignupActivity.this, HomeActivity.class));
+                boolean accepted = TermsPrefs.hasAccepted(this);
+                Intent next = new Intent(this, accepted ? HomeActivity.class : TermsActivity.class);
+                next.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(next);
                 finish();
-            } else {
+            }
+            else
+            {
                 setLoading(false);
                 String msg = (task.getException() != null)
                         ? task.getException().getMessage()
