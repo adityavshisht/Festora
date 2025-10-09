@@ -38,7 +38,7 @@
             android:background="@android:color/transparent"
             android:textSize="14sp"
             android:textColor="?android:attr/textColorPrimary"
-            android:text="the terms and conditions should be here"
+            android:text="the terms and conditions..."
             android:fadingEdgeLength="8dp"
             android:requiresFadingEdge="vertical"/>
 
