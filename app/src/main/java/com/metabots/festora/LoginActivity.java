@@ -10,15 +10,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private EditText etEmail, etPassword;
-    private Button btnLogin, btnGoogle;
+    private Button btnLogin, btnGoogle, btnBackLogin; // <-- include back
     private TextView tvSignup;
 
     @Override
@@ -27,30 +29,50 @@ public class LoginActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        etEmail    = findViewById(R.id.etEmail);
-        etPassword = findViewById(R.id.etPassword);
-        btnLogin   = findViewById(R.id.btnLogin);
-        btnGoogle  = findViewById(R.id.btnGoogle);
-        tvSignup   = findViewById(R.id.tvSignup);
+        etEmail      = findViewById(R.id.etEmail);
+        etPassword   = findViewById(R.id.etPassword);
+        btnLogin     = findViewById(R.id.btnLogin);
+        btnGoogle    = findViewById(R.id.btnGoogle);
+        btnBackLogin = findViewById(R.id.btnBackLogin); // <-- wire in onCreate
+        tvSignup     = findViewById(R.id.tvSignup);
 
         auth = FirebaseAuth.getInstance();
 
         btnLogin.setOnClickListener(v -> tryLogin());
-
         btnGoogle.setOnClickListener(v ->
                 startActivity(new Intent(LoginActivity.this, GoogleSignInActivity.class)));
-
         tvSignup.setOnClickListener(v ->
                 startActivity(new Intent(LoginActivity.this, SignupActivity.class)));
+
+        // Back button with fallback if this activity is task root
+        btnBackLogin.setOnClickListener(v -> {
+            if (isTaskRoot()) {
+                startActivity(new Intent(LoginActivity.this, OptionActivity.class));
+            }
+            finish();
+        });
+
+        // Optional: make system back behave the same way
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override public void handleOnBackPressed() {
+                if (isTaskRoot()) {
+                    startActivity(new Intent(LoginActivity.this, OptionActivity.class));
+                }
+                finish();
+            }
+        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            if (!TermsPrefs.hasAccepted(this)) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            String uid = user.getUid();
+            if (!TermsPrefs.hasAccepted(this, uid)) {
                 startActivity(new Intent(this, TermsActivity.class)
-                        .putExtra(TermsActivity.EXTRA_REDIRECT, "home"));
+                        .putExtra(TermsActivity.EXTRA_REDIRECT, "home")
+                        .putExtra(TermsActivity.EXTRA_USER_ID, uid));
             } else {
                 startActivity(new Intent(this, HomeActivity.class));
             }
@@ -77,10 +99,17 @@ public class LoginActivity extends AppCompatActivity {
 
         auth.signInWithEmailAndPassword(email, pass)
                 .addOnSuccessListener(result -> {
-                    Toast.makeText(this, "Welcome!", Toast.LENGTH_SHORT).show();
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    String uid = (user != null) ? user.getUid() : null;
 
-                    boolean accepted = TermsPrefs.hasAccepted(this);
-                    Intent next = new Intent(this, accepted ? HomeActivity.class : TermsActivity.class);
+                    Intent next;
+                    if (TermsPrefs.hasAccepted(this, uid)) {
+                        next = new Intent(this, HomeActivity.class);
+                    } else {
+                        next = new Intent(this, TermsActivity.class)
+                                .putExtra(TermsActivity.EXTRA_REDIRECT, "home")
+                                .putExtra(TermsActivity.EXTRA_USER_ID, uid);
+                    }
                     next.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(next);
                     finish();
@@ -92,5 +121,4 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
                 });
     }
-
 }

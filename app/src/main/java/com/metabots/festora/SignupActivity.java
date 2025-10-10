@@ -4,96 +4,114 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.auth.FirebaseUser;
 
 public class SignupActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
-
-    private EditText etName, etEmail, etPassword, etConfirm;
-    private MaterialButton btnSignup, btnBack;
-    private TextView tvGoLogin;
-    private ProgressBar progress;
+    private EditText etEmail, etPassword, etConfirm;
+    private Button btnSignup, btnGoogle; // may be null if not in layout
+    private TextView tvLogin;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_signup);
 
-        auth = FirebaseAuth.getInstance();
+        auth       = FirebaseAuth.getInstance();
 
-        etName     = findViewById(R.id.etName);
+        // Make sure these IDs match your activity_signup.xml
         etEmail    = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
-        etConfirm  = findViewById(R.id.etConfirm);
-        btnSignup  = findViewById(R.id.btnDoSignup);
-        btnBack    = findViewById(R.id.btnBackSignup);
-        tvGoLogin  = findViewById(R.id.tvGoLogin);
-        progress   = findViewById(R.id.progress);
+        etConfirm  = findViewById(R.id.etConfirm);           // <- ensure this id exists
+        btnSignup  = findViewById(R.id.btnDoSignup);         // <- ensure this id exists
+        tvLogin    = findViewById(R.id.tvGoLogin);           // <- ensure this id exists
 
-        btnBack.setOnClickListener(v -> finish());
-        tvGoLogin.setOnClickListener(v ->
-                startActivity(new Intent(SignupActivity.this, LoginActivity.class)));
+        // Optional Google button. If not present in layout, this stays null and is safely ignored.
+        try {
+            btnGoogle = findViewById(R.id.btnGoogle);        // <- only if you have it in XML
+        } catch (Exception ignored) { btnGoogle = null; }
 
         btnSignup.setOnClickListener(v -> trySignup());
+
+        if (btnGoogle != null) {
+            btnGoogle.setOnClickListener(v ->
+                    startActivity(new Intent(SignupActivity.this, GoogleSignInActivity.class)));
+        }
+
+        tvLogin.setOnClickListener(v ->
+                startActivity(new Intent(SignupActivity.this, LoginActivity.class)));
+        Button btnBackSignup = findViewById(R.id.btnBackSignup);
+        btnBackSignup.setOnClickListener(v -> finish());
+
     }
+
+    // IMPORTANT: do NOT auto-redirect in onStart() or you’ll bounce away from sign-up screen
+    // Handle navigation only after successful account creation.
 
     private void trySignup() {
-        String name  = etName.getText().toString().trim();
-        String email = etEmail.getText().toString().trim();
-        String pass  = etPassword.getText().toString();
-        String conf  = etConfirm.getText().toString();
+        final String email = etEmail.getText().toString().trim();
+        final String pass  = etPassword.getText().toString();
+        final String conf  = etConfirm.getText().toString();
 
-        if (TextUtils.isEmpty(name)) { etName.setError("Enter name"); etName.requestFocus(); return; }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) { etEmail.setError("Enter a valid email"); etEmail.requestFocus(); return; }
-        if (pass.length() < 6) { etPassword.setError("At least 6 characters"); etPassword.requestFocus(); return; }
-        if (!pass.equals(conf)) { etConfirm.setError("Passwords do not match"); etConfirm.requestFocus(); return; }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            etEmail.setError("Enter a valid email");
+            etEmail.requestFocus();
+            return;
+        }
+        if (TextUtils.isEmpty(pass) || pass.length() < 6) {
+            etPassword.setError("Password must be at least 6 characters");
+            etPassword.requestFocus();
+            return;
+        }
+        if (!pass.equals(conf)) {
+            etConfirm.setError("Passwords do not match");
+            etConfirm.requestFocus();
+            return;
+        }
 
-        setLoading(true);
+        btnSignup.setEnabled(false);
 
-        auth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                if (auth.getCurrentUser() != null) {
-                    auth.getCurrentUser().updateProfile(
-                            new com.google.firebase.auth.UserProfileChangeRequest.Builder()
-                                    .setDisplayName(name)
-                                    .build()
-                    );
-                }
-                boolean accepted = TermsPrefs.hasAccepted(this);
-                Intent next = new Intent(this, accepted ? HomeActivity.class : TermsActivity.class);
-                next.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(next);
-                finish();
-            }
-            else
-            {
-                setLoading(false);
-                String msg = (task.getException() != null)
-                        ? task.getException().getMessage()
-                        : "Signup failed";
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-            }
-        });
+        auth.createUserWithEmailAndPassword(email, pass)
+                .addOnSuccessListener((AuthResult res) -> {
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    String uid = (user != null) ? user.getUid() : null;
+                    Toast.makeText(this, "Account created!", Toast.LENGTH_SHORT).show();
+                    routeByTerms(uid);
+                })
+                .addOnFailureListener(e -> {
+                    btnSignup.setEnabled(true);
+                    String msg = (e.getMessage() == null || e.getMessage().trim().isEmpty())
+                            ? "Sign up failed" : e.getMessage();
+                    Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+                });
     }
 
-    private void setLoading(boolean loading) {
-        btnSignup.setEnabled(!loading);
-        etName.setEnabled(!loading);
-        etEmail.setEnabled(!loading);
-        etPassword.setEnabled(!loading);
-        etConfirm.setEnabled(!loading);
-        progress.setVisibility(loading ? android.view.View.VISIBLE : android.view.View.GONE);
+    /** Navigate based on whether THIS user accepted terms. */
+    private void routeByTerms(String uid) {
+        Intent next;
+        if (TermsPrefs.hasAccepted(this, uid)) {
+            next = new Intent(this, HomeActivity.class);
+        } else {
+            next = new Intent(this, TermsActivity.class)
+                    .putExtra(TermsActivity.EXTRA_REDIRECT, "home")
+                    .putExtra(TermsActivity.EXTRA_USER_ID, uid);
+        }
+        next.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(next);
+        finish();
     }
+
 }

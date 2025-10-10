@@ -94,6 +94,15 @@
             android:textColor="#1C4B9D"
             android:clickable="true"
             android:focusable="true" />
+
     </LinearLayout>
 
+
+    <Button
+        android:id="@+id/btnBackLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_marginTop="8dp" />
 </LinearLayout>

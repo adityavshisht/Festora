@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".HomeActivity">
 
-    <!-- AppBar with Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
@@ -26,7 +25,6 @@
             android:background="?attr/colorSurface" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Content -->
     <LinearLayout
         android:id="@+id/content_root"
         android:orientation="vertical"
@@ -35,20 +33,25 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Search -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilSearch"
             style="@style/Widget.Material3.TextInputLayout.FilledBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Search events, cities, categories">
+            android:hint="Search events, cities, categories"
+            app:endIconMode="custom"
+            app:endIconDrawable="@android:drawable/ic_menu_search">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionSearch"
+                android:singleLine="true"
                 android:inputType="text" />
         </com.google.android.material.textfield.TextInputLayout>
+
+
 
         <!-- Categories -->
         <HorizontalScrollView
@@ -58,46 +61,52 @@
             android:overScrollMode="never"
             android:scrollbars="none">
 
-            <LinearLayout
-                android:id="@+id/chipsContainer"
-                android:orientation="horizontal"
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupCategories"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="true">
 
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAll"
                     style="@style/Widget.Material3.Chip.Assist.Elevated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="All" />
+                    android:text="All"
+                    android:checked="true" />
 
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/chipMusic"
                     style="@style/Widget.Material3.Chip.Assist.Elevated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Music" />
 
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSports"
                     style="@style/Widget.Material3.Chip.Assist.Elevated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Sports" />
 
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTech"
                     style="@style/Widget.Material3.Chip.Assist.Elevated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Tech" />
 
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/chipNetworking"
                     style="@style/Widget.Material3.Chip.Assist.Elevated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Networking" />
 
-            </LinearLayout>
+            </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 
-        <!-- Section header -->
         <TextView
             android:id="@+id/tvSection"
             android:layout_width="wrap_content"
@@ -107,7 +116,6 @@
             android:textSize="18sp"
             android:layout_marginTop="16dp" />
 
-        <!-- Events list -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvEvents"
             android:layout_width="match_parent"
@@ -116,10 +124,8 @@
             android:clipToPadding="false"
             android:paddingTop="8dp"
             android:paddingBottom="8dp" />
-
     </LinearLayout>
 
-    <!-- Create Event (anchored to RecyclerView) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabCreate"
         android:layout_width="wrap_content"
