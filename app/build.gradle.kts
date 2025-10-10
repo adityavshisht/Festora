@@ -57,6 +57,8 @@ dependencies {
     // Firebase Auth (for Google + Email login)
     implementation("com.google.firebase:firebase-auth:22.3.1    ")
 
+    implementation ("com.google.firebase:firebase-firestore")
+
     // (optional) Firebase Analytics
     implementation("com.google.firebase:firebase-analytics")
 

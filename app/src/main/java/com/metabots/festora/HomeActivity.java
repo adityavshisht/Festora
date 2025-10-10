@@ -4,9 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -22,8 +20,6 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -63,11 +59,8 @@ public class HomeActivity extends AppCompatActivity {
     private final ExecutorService exec = Executors.newSingleThreadExecutor();
 
     private TextInputEditText etSearch;
-    private TextInputLayout tilSearch;
     private TextView tvSection;
-
-    // null = All; else: "Music" | "Sports" | "Tech" | "Networking"
-    private String selectedTag = null;
+    private String selectedTag = null; // null=All; else "Music|Sports|Tech|Networking"
 
     private void showBanner(String msg) {
         runOnUiThread(() ->
@@ -81,7 +74,7 @@ public class HomeActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
 
-        // ---- Gate: user must have accepted Terms (NO EXTRA_USER_ID reference) ----
+        // Terms gate
         FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
         String uid = (u != null) ? u.getUid() : null;
         if (!TermsPrefs.hasAccepted(this, uid)) {
@@ -92,7 +85,6 @@ public class HomeActivity extends AppCompatActivity {
             finish();
             return;
         }
-        // -------------------------------------------------------------------------
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -110,39 +102,26 @@ public class HomeActivity extends AppCompatActivity {
 
         tvSection = findViewById(R.id.tvSection);
 
-        findViewById(R.id.fabCreate).setOnClickListener(v -> showBanner("Create new event"));
+        // FAB -> launch CreateEventActivity (NO result API)
+        findViewById(R.id.fabCreate).setOnClickListener(v ->
+                startActivity(new Intent(HomeActivity.this, CreateEventActivity.class))
+        );
 
-        tilSearch = findViewById(R.id.tilSearch);
+
+
         etSearch = findViewById(R.id.etSearch);
-
-        // --- Search submit wiring (IME search + Enter key + end icon) ---
         if (etSearch != null) {
             etSearch.setOnEditorActionListener((tv, actionId, keyEvent) -> {
-                boolean isImeSearch = actionId == EditorInfo.IME_ACTION_SEARCH;
-                boolean isImeNone   = actionId == EditorInfo.IME_NULL; // some keyboards use this
-                if (isImeSearch || isImeNone) {
-                    submitSearch();
-                    return true;
-                }
-                return false;
-            });
-
-            etSearch.setOnKeyListener((v, keyCode, event) -> {
-                if (keyCode == KeyEvent.KEYCODE_ENTER
-                        && event != null
-                        && event.getAction() == KeyEvent.ACTION_UP) {
-                    submitSearch();
+                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_NULL) {
+                    String q = tv.getText() == null ? "" : tv.getText().toString().trim();
+                    fetchEvents(q, selectedTag);
                     return true;
                 }
                 return false;
             });
         }
-        if (tilSearch != null) {
-            tilSearch.setEndIconOnClickListener(v -> submitSearch());
-        }
-        // -----------------------------------------------------------------
 
-        // Chips (safe listeners only)
+        // Chips
         ChipGroup chipGroup = findViewById(R.id.chipGroupCategories);
         Chip chipAll = findViewById(R.id.chipAll);
         Chip chipMusic = findViewById(R.id.chipMusic);
@@ -150,9 +129,9 @@ public class HomeActivity extends AppCompatActivity {
         Chip chipTech = findViewById(R.id.chipTech);
         Chip chipNetworking = findViewById(R.id.chipNetworking);
 
-        chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            handleChipSelection(group.getCheckedChipId(), chipAll, chipMusic, chipSports, chipTech, chipNetworking);
-        });
+        chipGroup.setOnCheckedChangeListener((group, checkedId) ->
+                handleChipSelection(group.getCheckedChipId(), chipAll, chipMusic, chipSports, chipTech, chipNetworking)
+        );
 
         chipAll.setOnClickListener(v -> { chipAll.setChecked(true);  handleChipSelection(chipAll.getId(), chipAll, chipMusic, chipSports, chipTech, chipNetworking); });
         chipMusic.setOnClickListener(v -> { chipMusic.setChecked(true); handleChipSelection(chipMusic.getId(), chipAll, chipMusic, chipSports, chipTech, chipNetworking); });
@@ -163,23 +142,6 @@ public class HomeActivity extends AppCompatActivity {
         // Initial load
         fetchEvents(null, selectedTag);
         showBanner("Home ready");
-    }
-
-    private void submitSearch() {
-        String q = (etSearch != null && etSearch.getText() != null)
-                ? etSearch.getText().toString().trim() : "";
-
-        // Hide keyboard + clear focus
-        try {
-            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            if (imm != null && etSearch != null) {
-                imm.hideSoftInputFromWindow(etSearch.getWindowToken(), 0);
-            }
-        } catch (Exception ignored) {}
-        if (etSearch != null) etSearch.clearFocus();
-
-        Log.d(TAG, "Search submit: \"" + q + "\" tag=" + selectedTag);
-        fetchEvents(q, selectedTag);
     }
 
     private void handleChipSelection(int checkedId,
