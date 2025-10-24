@@ -23,6 +23,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -159,6 +161,8 @@ public class CreateEventActivity extends AppCompatActivity {
                     Log.d(TAG, "Firestore: success");
                     Toast.makeText(CreateEventActivity.this, "Event created", Toast.LENGTH_SHORT).show();
 
+                    enrollHostAsAttendee(eventId, doc, hostUid, hostEmail);
+
                     // Explicitly return to Home no matter where we came from
                     Intent home = new Intent(CreateEventActivity.this, HomeActivity.class);
                     home.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -178,5 +182,53 @@ public class CreateEventActivity extends AppCompatActivity {
 
     private static String safeText(TextInputEditText t) {
         return t.getText() == null ? "" : t.getText().toString().trim();
+    }
+
+    private void enrollHostAsAttendee(String eventId, Map<String, Object> eventDoc, @Nullable String hostUid, @Nullable String hostEmail) {
+        if (TextUtils.isEmpty(eventId) || hostUid == null) return;
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || !hostUid.equals(user.getUid())) return;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        WriteBatch batch = db.batch();
+
+        Map<String, Object> userMeta = new HashMap<>();
+        userMeta.put("lastJoinedAt", FieldValue.serverTimestamp());
+
+        Map<String, Object> ticket = new HashMap<>();
+        ticket.put("eventId", eventId);
+        ticket.put("title", (String) eventDoc.get(TITLE));
+        ticket.put("dateText", (String) eventDoc.get(DATE_TEXT));
+        ticket.put("location", (String) eventDoc.get(LOCATION));
+        ticket.put("imageUrl", eventDoc.get(IMAGE_URL));
+        ticket.put("bookingUrl", null);
+        ticket.put("attendeeName", user.getDisplayName());
+        ticket.put("attendeeEmail", hostEmail);
+        ticket.put("joinedAt", FieldValue.serverTimestamp());
+        ticket.put("source", "firestore");
+        ticket.put("ticketType", "host");
+        ticket.put("hostUid", hostUid);
+        ticket.put("hostEmail", hostEmail);
+        if (eventDoc.get(CATEGORY) != null) ticket.put("category", eventDoc.get(CATEGORY));
+        if (eventDoc.get(DESCRIPTION) != null) ticket.put("description", eventDoc.get(DESCRIPTION));
+
+        batch.set(
+                db.collection("users").document(hostUid),
+                userMeta,
+                SetOptions.merge()
+        );
+        batch.set(
+                db.collection("users").document(hostUid)
+                        .collection("tickets")
+                        .document(eventId),
+                ticket,
+                SetOptions.merge()
+        );
+
+        batch.commit()
+                .addOnFailureListener(e ->
+                        Log.w(TAG, "Failed to enroll host as attendee: " + e.getMessage(), e)
+                );
     }
 }

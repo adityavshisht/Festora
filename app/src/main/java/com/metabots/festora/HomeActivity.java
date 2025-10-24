@@ -44,7 +44,7 @@ public class HomeActivity extends AppCompatActivity {
 
     // Ticketmaster
     private static final String TM_BASE = "https://app.ticketmaster.com/discovery/v2/events.json";
-    private static final String TM_API_KEY = "R3e5fsxMy5A86XgSoKHGBHGZPDu9ahNl";
+    public static final String TM_API_KEY = "R3e5fsxMy5A86XgSoKHGBHGZPDu9ahNl";
 
     // Segments
     private static final String SEGMENT_MUSIC  = "KZFzniwnSyZfZ7v7nJ";
@@ -97,8 +97,25 @@ public class HomeActivity extends AppCompatActivity {
 
         rv = findViewById(R.id.rvEvents);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new EventAdapter(this, data, e -> showBanner("Open: " + e.title));
+        // Inside onCreate(), after rv.setLayoutManager(...):
+// After rv.setLayoutManager(new LinearLayoutManager(this));
+        // After setting up the RecyclerView's LayoutManager:
+        adapter = new EventAdapter(this, data, e -> {
+            Intent intent = new Intent(HomeActivity.this, EventDetailsActivity.class);
+            intent.putExtra("id", e.id);
+            intent.putExtra("title", e.title);
+            intent.putExtra("dateTime", e.dateTime);
+            intent.putExtra("location", e.location);
+            intent.putExtra("imageUrl", e.imageUrl);
+            intent.putExtra("apiKey", TM_API_KEY);
+            startActivity(intent);
+        });
         rv.setAdapter(adapter);
+
+
+
+
+
 
         tvSection = findViewById(R.id.tvSection);
 

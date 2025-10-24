@@ -3,12 +3,19 @@
     <!-- App -->
     <string name="app_name">Festora</string>
 
+    <!-- Detail screen strings -->
+    <string name="hero_image">Event image</string>
+    <string name="seatmap">Seat map</string>
+    <string name="share">Share</string>
+    <string name="add_to_calendar">Add to Calendar</string>
+    <string name="book">Book</string>
+
     <!-- Terms -->
     <string name="terms_title">Terms &amp; Conditions</string>
-    <string name="terms_body">
+    <string name="terms_body"><![CDATA[
 Last updated: 2025-10-09
 
-Welcome to Festora! These Terms and Conditions (“Terms”) govern your access to and use of the Festora mobile app and any related services (collectively, the “Service”). By creating an account, accessing, or using the Service, you agree to be bound by these Terms.
+Welcome to Festora! These Terms and Conditions ("Terms") govern your access to and use of the Festora mobile app and any related services (collectively, the "Service"). By creating an account, accessing, or using the Service, you agree to be bound by these Terms.
 
 1. Eligibility and Accounts
 • You must be at least 13 years old (or the age of digital consent in your region) to use Festora. If you are under the age of majority, you must have permission from a parent or legal guardian.
@@ -48,7 +55,7 @@ Welcome to Festora! These Terms and Conditions (“Terms”) govern your access 
 • The Service, including logos, trademarks, and software, is owned by Festora or its licensors and is protected by applicable laws. Except for rights expressly granted, no license is granted to you.
 
 9. Disclaimers
-• THE SERVICE IS PROVIDED “AS IS” AND “AS AVAILABLE.” FESTORA MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
+• THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE." FESTORA MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
 • Event information may be incomplete, delayed, or inaccurate. Availability of events can change without notice.
 
 10. Limitation of Liability
@@ -71,13 +78,29 @@ Welcome to Festora! These Terms and Conditions (“Terms”) govern your access 
 15. Contact
 • Questions? Contact us at: support@festora.app (or via the in-app help).
 
-By checking the box and tapping “Accept,” you acknowledge that you have read, understood, and agree to these Terms.
-    </string>
+By checking the box and tapping "Accept," you acknowledge that you have read, understood, and agree to these Terms.
+    ]]></string>
 
-    <!-- Template / Navigation placeholders (fix missing resource errors) -->
+    <!-- Template / Navigation placeholders -->
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</string>
     <string name="first_fragment_label">First</string>
     <string name="second_fragment_label">Second</string>
+    <string name="join_and_pay">Join &amp; Pay</string>
+    <string name="join_event_title">Join Event</string>
+    <string name="event_image_preview">Event image preview</string>
+    <string name="payment_details">Payment details</string>
+    <string name="full_name_hint">Full name</string>
+    <string name="email_hint">Email</string>
+    <string name="card_number_hint">Card number</string>
+    <string name="expiry_hint">MM/YY</string>
+    <string name="cvv_hint">CVV</string>
+    <string name="confirm_join">Confirm &amp; Join</string>
+    <string name="joined">Joined</string>
+    <string name="join_event">Join Event</string>
+    <string name="hosted_event_details">Event details</string>
+    <string name="delete_event">Delete event</string>
+    <string name="event_deleted">Event deleted</string>
+    <string name="delete_event_confirm">Delete this event for everyone?</string>
 </resources>

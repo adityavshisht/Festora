@@ -10,42 +10,50 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.TextUtils;
+import android.util.Base64;
+
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.VH> {
 
     public interface OnEventClick {
-        void onEventClick(Event e);
+        void onEventClick(@NonNull Event e);
     }
 
     private final Context ctx;
     private final List<Event> data;
-    private final OnEventClick listener;
+    private final OnEventClick onClick;
+    private final LayoutInflater inflater;
 
-    public EventAdapter(Context ctx, List<Event> data, OnEventClick listener) {
+    public EventAdapter(@NonNull Context ctx,
+                        @NonNull List<Event> data,
+                        @NonNull OnEventClick onClick) {
         this.ctx = ctx;
         this.data = data;
-        this.listener = listener;
+        this.onClick = onClick;
+        this.inflater = LayoutInflater.from(ctx);
     }
 
     @NonNull @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(ctx).inflate(R.layout.item_event, parent, false);
+        View v = inflater.inflate(R.layout.item_event, parent, false);
         return new VH(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull VH h, int pos) {
-        Event e = data.get(pos);
-        h.tvTitle.setText(e.title);
-        h.tvDate.setText(e.dateTime);
-        h.tvLocation.setText(e.location);
+    public void onBindViewHolder(@NonNull VH h, int position) {
+        Event e = data.get(position);
+        h.tvTitle.setText(e.title != null ? e.title : "—");
+        h.tvDate.setText(e.dateTime != null ? e.dateTime : "Date TBA");
+        h.tvLocation.setText(e.location != null ? e.location : "Location TBA");
 
-        // For now, use local drawable; later switch to Glide for URLs
-        h.imgBanner.setImageResource(R.drawable.logo1);
+        bindImage(e.imageUrl, h.imgBanner);
 
         h.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onEventClick(e);
+            if (onClick != null) onClick.onEventClick(e);
         });
     }
 
@@ -56,10 +64,34 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.VH> {
         TextView tvTitle, tvDate, tvLocation;
         VH(@NonNull View v) {
             super(v);
-            imgBanner = v.findViewById(R.id.imgBanner);
-            tvTitle = v.findViewById(R.id.tvTitle);
-            tvDate = v.findViewById(R.id.tvDate);
+            imgBanner  = v.findViewById(R.id.imgBanner);
+            tvTitle    = v.findViewById(R.id.tvTitle);
+            tvDate     = v.findViewById(R.id.tvDate);
             tvLocation = v.findViewById(R.id.tvLocation);
         }
+    }
+
+    private void bindImage(String urlOrData, ImageView imageView) {
+        if (TextUtils.isEmpty(urlOrData)) {
+            imageView.setImageResource(R.drawable.ic_launcher_foreground);
+            return;
+        }
+
+        if (urlOrData.startsWith("data:image")) {
+            int comma = urlOrData.indexOf(',');
+            if (comma != -1 && comma + 1 < urlOrData.length()) {
+                String base64 = urlOrData.substring(comma + 1).replaceAll("\\s", "");
+                try {
+                    byte[] bytes = Base64.decode(base64, Base64.DEFAULT);
+                    Glide.with(ctx).load(bytes).into(imageView);
+                    return;
+                } catch (IllegalArgumentException ignore) {
+                    imageView.setImageResource(R.drawable.ic_launcher_foreground);
+                    return;
+                }
+            }
+        }
+
+        Glide.with(ctx).load(urlOrData).into(imageView);
     }
 }
