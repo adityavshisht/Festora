@@ -32,6 +32,11 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 
 public class MyEventsProfileActivity extends AppCompatActivity {
 
@@ -41,7 +46,7 @@ public class MyEventsProfileActivity extends AppCompatActivity {
     private final List<Event> hostedData = new ArrayList<>();
     private final List<Event> upcomingData = new ArrayList<>();
 
-    private EventAdapter hostedAdapter;
+    private HostedEventsAdapter hostedAdapter;
     private EventAdapter upcomingAdapter;
 
     private View root;
@@ -78,7 +83,7 @@ public class MyEventsProfileActivity extends AppCompatActivity {
         rvHosted.setLayoutManager(new LinearLayoutManager(this));
         rvUpcoming.setLayoutManager(new LinearLayoutManager(this));
 
-        hostedAdapter = new EventAdapter(this, hostedData, e -> banner("Open: " + e.title));
+        hostedAdapter = new HostedEventsAdapter(this, hostedData);
         upcomingAdapter = new EventAdapter(this, upcomingData, e -> banner("Open: " + e.title));
 
         rvHosted.setAdapter(hostedAdapter);
@@ -91,7 +96,6 @@ public class MyEventsProfileActivity extends AppCompatActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         final String myUid = user != null ? user.getUid() : null;
 
-        // Grab the latest events (hosted by anyone), then split locally
         FirebaseFirestore.getInstance()
                 .collection(EVENTS)
                 .orderBy(CREATED_AT, Query.Direction.DESCENDING)
@@ -101,6 +105,9 @@ public class MyEventsProfileActivity extends AppCompatActivity {
                     hostedData.clear();
                     upcomingData.clear();
 
+                    SimpleDateFormat sdf = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
+                    Date now = new Date();
+
                     for (DocumentSnapshot d : snap.getDocuments()) {
                         String id = d.getId();
                         String title = d.getString(TITLE);
@@ -108,16 +115,32 @@ public class MyEventsProfileActivity extends AppCompatActivity {
                         String location = d.getString(LOCATION);
                         String imageUrl = d.getString(IMAGE_URL);
                         String hostUid = d.getString(HOST_UID);
-                        // String hostEmail = d.getString(HOST_EMAIL);
-                        // String category = d.getString(CATEGORY);
-                        // String description = d.getString(DESCRIPTION);
 
                         Event ev = new Event(id, title, dateText, location, imageUrl);
+
                         if (myUid != null && myUid.equals(hostUid)) {
                             hostedData.add(ev);
-                        } else {
-                            upcomingData.add(ev);
+                        } else if (dateText != null) {
+                            Date now = new Date();
+                            Date eventDate = null;
+
+                            try {
+                                // Try your main format
+                                SimpleDateFormat f1 = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
+                                eventDate = f1.parse(dateText);
+                            } catch (ParseException e1) {
+                                try {
+                                    // Try an alternative fallback (longer day/month names)
+                                    SimpleDateFormat f2 = new SimpleDateFormat("EEEE, MMMM d • h:mm a", Locale.getDefault());
+                                    eventDate = f2.parse(dateText);
+                                } catch (ParseException ignored) { }
+                            }
+
+                            if (eventDate != null && eventDate.after(now)) {
+                                upcomingData.add(ev);
+                            }
                         }
+
                     }
 
                     hostedAdapter.notifyDataSetChanged();
@@ -128,6 +151,7 @@ public class MyEventsProfileActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> banner("Failed to load: " + e.getMessage()));
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
